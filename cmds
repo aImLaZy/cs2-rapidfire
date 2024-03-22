@@ -15,7 +15,6 @@ struct RepeatedPtrField_t
 	Rep_t* m_pRep;
 };
  
-// @source: master/game/shared/in_buttons.h
 enum ECommandButtons : int
 {
 	IN_ATTACK = (1 << 0),
@@ -49,9 +48,9 @@ enum ECommandButtons : int
  
 class CBasePB
 {
-	void* pVTable; // 0x0
-	std::uint32_t m_nHasBits; // 0x8
-	std::uint64_t m_nCachedBits; // 0xC
+	void* pVTable;
+	std::uint32_t m_nHasBits; 
+	std::uint64_t m_nCachedBits; 
 };
 static_assert(sizeof(CBasePB) == 0x18);
  
@@ -70,29 +69,29 @@ public:
 class CCSGOInterpolationInfoPB : public CBasePB
 {
 public:
-	float m_flFraction; // 0x18
-	int m_nSrcTick; // 0x1C
-	int m_nDstTick; // 0x20
+	float m_flFraction; 
+	int m_nSrcTick; 
+	int m_nDstTick; 
 };
  
 class CCSGOInputHistoryEntryPB : public CBasePB
 {
 public:
-	CMsgQAngle* m_pViewCmd; // 0x18
-	CMsgVector* m_pShootOriginCmd; // 0x20
-	CMsgVector* m_pTargetHeadOriginCmd; // 0x28
-	CMsgVector* m_pTargetAbsOriginCmd; // 0x30
-	CMsgQAngle* m_pTargetViewCmd; // 0x38
-	CCSGOInterpolationInfoPB* m_cl_interp; // 0x40
-	CCSGOInterpolationInfoPB* m_sv_interp0; // 0x48
-	CCSGOInterpolationInfoPB* m_sv_interp1; // 0x50
-	CCSGOInterpolationInfoPB* m_player_interp; // 0x58
-	int m_nRenderTickCount; // 0x60
-	float m_flRenderTickFraction; // 0x64
-	int m_nPlayerTickCount; // 0x68
-	float m_flPlayerTickFraction; // 0x6C
-	int m_nFrameNumber; // 0x70
-	int m_nTargetEntIndex; // 0x74
+	CMsgQAngle* m_pViewCmd; 
+	CMsgVector* m_pShootOriginCmd; 
+	CMsgVector* m_pTargetHeadOriginCmd; 
+	CMsgVector* m_pTargetAbsOriginCmd; 
+	CMsgQAngle* m_pTargetViewCmd; 
+	CCSGOInterpolationInfoPB* m_cl_interp; 
+	CCSGOInterpolationInfoPB* m_sv_interp0; 
+	CCSGOInterpolationInfoPB* m_sv_interp1; 
+	CCSGOInterpolationInfoPB* m_player_interp; 
+	int m_nRenderTickCount; 
+	float m_flRenderTickFraction; 
+	int m_nPlayerTickCount; 
+	float m_flPlayerTickFraction; 
+	int m_nFrameNumber; 
+	int m_nTargetEntIndex; 
 };
  
 struct CInButtonStatePB : CBasePB
