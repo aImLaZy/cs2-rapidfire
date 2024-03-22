@@ -1,0 +1,189 @@
+#pragma once
+ 
+template <typename T>
+struct RepeatedPtrField_t
+{
+	struct Rep_t
+	{
+		int m_nAllocatedSize;
+		T* m_tElements[(std::numeric_limits<int>::max() - 2 * sizeof(int)) / sizeof(void*)];
+	};
+ 
+	void* m_pArena;
+	int m_nCurrentSize;
+	int m_nTotalSize;
+	Rep_t* m_pRep;
+};
+ 
+// @source: master/game/shared/in_buttons.h
+enum ECommandButtons : int
+{
+	IN_ATTACK = (1 << 0),
+	IN_JUMP = (1 << 1),
+	IN_DUCK = (1 << 2),
+	IN_FORWARD = (1 << 3),
+	IN_BACK = (1 << 4),
+	IN_USE = (1 << 5),
+	IN_CANCEL = (1 << 6),
+	IN_LEFT = (1 << 7),
+	IN_RIGHT = (1 << 8),
+	IN_MOVELEFT = (1 << 9),
+	IN_MOVERIGHT = (1 << 10),
+	IN_SECOND_ATTACK = (1 << 11),
+	IN_RUN = (1 << 12),
+	IN_RELOAD = (1 << 13),
+	IN_LEFT_ALT = (1 << 14),
+	IN_RIGHT_ALT = (1 << 15),
+	IN_SCORE = (1 << 16),
+	IN_SPEED = (1 << 17),
+	IN_WALK = (1 << 18),
+	IN_ZOOM = (1 << 19),
+	IN_FIRST_WEAPON = (1 << 20),
+	IN_SECOND_WEAPON = (1 << 21),
+	IN_BULLRUSH = (1 << 22),
+	IN_FIRST_GRENADE = (1 << 23),
+	IN_SECOND_GRENADE = (1 << 24),
+	IN_MIDDLE_ATTACK = (1 << 25),
+	IN_USE_OR_RELOAD = (1 << 26)
+};
+ 
+class CBasePB
+{
+	void* pVTable; // 0x0
+	std::uint32_t m_nHasBits; // 0x8
+	std::uint64_t m_nCachedBits; // 0xC
+};
+static_assert(sizeof(CBasePB) == 0x18);
+ 
+class CMsgQAngle : public CBasePB
+{
+public:
+	QAngle m_angValue; // 0x18
+};
+ 
+class CMsgVector : public CBasePB
+{
+public:
+	Vector4D m_vecValue; // 0x18
+};
+ 
+class CCSGOInterpolationInfoPB : public CBasePB
+{
+public:
+	float m_flFraction; // 0x18
+	int m_nSrcTick; // 0x1C
+	int m_nDstTick; // 0x20
+};
+ 
+class CCSGOInputHistoryEntryPB : public CBasePB
+{
+public:
+	CMsgQAngle* m_pViewCmd; // 0x18
+	CMsgVector* m_pShootOriginCmd; // 0x20
+	CMsgVector* m_pTargetHeadOriginCmd; // 0x28
+	CMsgVector* m_pTargetAbsOriginCmd; // 0x30
+	CMsgQAngle* m_pTargetViewCmd; // 0x38
+	CCSGOInterpolationInfoPB* m_cl_interp; // 0x40
+	CCSGOInterpolationInfoPB* m_sv_interp0; // 0x48
+	CCSGOInterpolationInfoPB* m_sv_interp1; // 0x50
+	CCSGOInterpolationInfoPB* m_player_interp; // 0x58
+	int m_nRenderTickCount; // 0x60
+	float m_flRenderTickFraction; // 0x64
+	int m_nPlayerTickCount; // 0x68
+	float m_flPlayerTickFraction; // 0x6C
+	int m_nFrameNumber; // 0x70
+	int m_nTargetEntIndex; // 0x74
+};
+ 
+struct CInButtonStatePB : CBasePB
+{
+	uint64_t m_nValue;
+	uint64_t m_nValueChanged;
+	uint64_t m_nValueScroll;
+};
+static_assert(sizeof(CInButtonStatePB) == 0x30);
+ 
+struct CSubtickMoveStep : CBasePB
+{
+	uint64_t nButton;
+	bool bPressed;
+	float flWhen;
+	float flAnalogForwardDelta = 4;
+	float flAnalogLeftDelta = 5;
+};
+ 
+class CBaseUserCmdPB : public CBasePB
+{
+public:
+	RepeatedPtrField_t<CSubtickMoveStep> m_subtickMovesField;
+	const char* m_szMoveCrc;
+	CInButtonStatePB* m_pInButtonState;
+	CMsgQAngle* m_pViewangles;
+	int32_t m_nCommandNumber;
+	int32_t m_nTickCount;
+	float m_flForwardMove;
+	float m_flSideMove;
+	float m_flUpMove;
+	int32_t m_nImpulse;
+	int32_t m_nWeaponSelect;
+	int32_t m_nRandomSeed;
+	int32_t m_nMousedX;
+	int32_t m_nMousedY;
+	uint32_t m_nConsumedServerAngleChanges;
+	int32_t m_nCmdFlags;
+	uint32_t m_nPawnEntityHandle;
+};
+ 
+class CCSGOUserCmdPB
+{
+public:
+	std::uint32_t m_nHasBits;
+	std::uint64_t m_nCachedSize;
+	RepeatedPtrField_t<CCSGOInputHistoryEntryPB> m_inputHistoryField;
+	CBaseUserCmdPB* m_pBaseCmd;
+	int32_t m_nAttack3StartHhistoryIndex;
+	int32_t m_nAttack1StartHhistoryIndex;
+	int32_t m_nAttack2StartHhistoryIndex;
+};
+ 
+struct CInButtonState
+{
+	void* pVTable;
+	uint64_t m_nValue;
+	uint64_t m_nValueChanged;
+	uint64_t m_nValueScroll;
+};
+static_assert(sizeof(CInButtonStatePB) == 0x30);
+ 
+class CUserCmd
+{
+public:
+	void* pVTable;
+	CCSGOUserCmdPB m_csgoUserCmd;
+	CInButtonState m_nButtons;
+	MEM_PAD(0x20);
+ 
+	CCSGOInputHistoryEntryPB* GetInputHistoryEntry(int nIndex)
+	{
+		if (nIndex >= m_csgoUserCmd.m_inputHistoryField.m_pRep->m_nAllocatedSize)
+			return nullptr;
+ 
+		return m_csgoUserCmd.m_inputHistoryField.m_pRep->m_tElements[nIndex];
+	}
+ 
+	void SetSubTickAngle(const QAngle& angView)
+	{
+		for (int i = 0; i < this->m_csgoUserCmd.m_inputHistoryField.m_pRep->m_nAllocatedSize; i++)
+		{
+			CCSGOInputHistoryEntryPB* pInputEntry = this->GetInputHistoryEntry(i);
+			if (pInputEntry == nullptr)
+				continue;
+ 
+			if (pInputEntry->m_pViewCmd == nullptr)
+				continue;
+ 
+			pInputEntry->m_pViewCmd->m_angValue = angView;
+		}
+	}
+};
+static_assert(sizeof(CUserCmd) == 0x88);
