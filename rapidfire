@@ -1,0 +1,19 @@
+void RapidFire(CUserCmd* pCmd)
+{
+	bool pressed = GetAsyncKeyState(VK_XBUTTON2) & 0x8000;
+	if (!pressed) return;
+ 
+	pCmd->m_nButtons.m_nValue |= IN_ATTACK;
+ 
+	for (int i = 0; i < pCmd->m_csgoUserCmd.m_inputHistoryField.m_pRep->m_nAllocatedSize; i++)
+	{
+		CCSGOInputHistoryEntryPB* pInputEntry = pCmd->GetInputHistoryEntry(i);
+		if (pInputEntry == nullptr)
+			continue;
+ 
+		if (pInputEntry->m_pViewCmd == nullptr)
+			continue;
+ 
+		pInputEntry->m_nPlayerTickCount = 0;
+	}
+}
